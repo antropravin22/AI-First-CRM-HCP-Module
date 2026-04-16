@@ -1,5 +1,9 @@
 import os
 import json
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -8,13 +12,16 @@ from database import SessionLocal, engine
 import models
 from typing import TypedDict, Annotated
 
+# --- 1. SECURE ENVIRONMENT SETUP ---
+load_dotenv() # This loads the GROQ_API_KEY from your .env file
+
 # --- DATABASE SETUP ---
 models.Base.metadata.create_all(bind=engine)
 
-# --- INITIALIZE LLM ---
+# --- 2. INITIALIZE LLM (Task 1 Requirement) ---
 llm = ChatGroq(
-    model_name="llama-3.1-8b-instant",  # <--- The new, supported model!
-    groq_api_key="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"
+    model_name="gemma2-9b-it",  # Updated to the required model
+    api_key=os.getenv("GROQ_API_KEY") # Secured API Key
 )
 
 # --- TOOLS ---
@@ -154,3 +161,26 @@ def run_agent(user_input: str):
         "form_data": form_data,
         "tool_output": result.get("tool_result", "")
     }
+
+# --- 3. FASTAPI BACKEND SETUP (Task 1 Requirement) ---
+app = FastAPI(title="AI-First CRM HCP Module Backend")
+
+# Enable CORS so your React frontend can talk to this backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Allows requests from any frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class ChatRequest(BaseModel):
+    message: str
+
+@app.post("/api/interact")
+async def process_interaction(request: ChatRequest):
+    """
+    Endpoint for React UI.
+    Receives chat input, runs LangGraph, returns form data and tool results.
+    """
+    return run_agent(request.message)
