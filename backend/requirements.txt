@@ -1,0 +1,4 @@
+fastapi
+uvicorn
+langgraph
+langchain-groqpython3 -m uvicorn main:app --reload
