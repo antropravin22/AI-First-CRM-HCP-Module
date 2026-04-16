@@ -19,9 +19,10 @@ load_dotenv() # This loads the GROQ_API_KEY from your .env file
 models.Base.metadata.create_all(bind=engine)
 
 # --- 2. INITIALIZE LLM (Task 1 Requirement) ---
+
 llm = ChatGroq(
-    model_name="gemma2-9b-it",  # Updated to the required model
-    api_key=os.getenv("GROQ_API_KEY") # Secured API Key
+    model_name="llama-3.1-8b-instant",  # <--- Switched to an active Groq model
+    api_key=os.getenv("GROQ_API_KEY") 
 )
 
 # --- TOOLS ---

@@ -1,9 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# Make sure this matches your MySQL username and password!
-SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:12345678@localhost:3306/crm_db"
+# 1. Switched from MySQL to SQLite to use your local crm.db file
+SQLALCHEMY_DATABASE_URL = "sqlite:///./crm.db"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# 2. Added 'check_same_thread' which is required for SQLite
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
